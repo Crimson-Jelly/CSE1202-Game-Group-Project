@@ -38,10 +38,10 @@ class player{
     Texture2D player;
 
     void keyboard_movement(float w,float h){
-        if(IsKeyDown(KEY_W) && pos.y>65){pos.y-=5;}
-        if(IsKeyDown(KEY_S) && pos.y<h-115){pos.y+=5;}
-        if(IsKeyDown(KEY_A) && pos.x>65){pos.x-=5;}
-        if(IsKeyDown(KEY_D) && pos.x<w-96){pos.x+=5;}
+         if((IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) && pos.y>65){pos.y-=5;}
+        if((IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) && pos.y<h-115){pos.y+=5;}
+        if((IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) && pos.x>65){pos.x-=5;}
+        if((IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) && pos.x<w-96){pos.x+=5;}
     }
 
     void load(){
