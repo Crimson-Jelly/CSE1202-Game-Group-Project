@@ -2,6 +2,7 @@
 #include <cmath>
 #include <raylib.h>
 #include <vector>
+#include <algorithm>
 #include "raymath.h"
 using namespace std;
 
@@ -62,6 +63,7 @@ Texture2D Bullet::texture;
 
 class EnemyBullet{
 public:
+bool active = true;
     Vector2 pos;
     Vector2 velocity;
     float speed = 7.0f;
@@ -121,6 +123,32 @@ public:
 
 Texture2D EnemyBullet::texture;
 
+class map{
+    public:
+    Texture2D floor;
+    Texture2D wall;
+    RenderTexture2D screen;
+    void load(){
+    ChangeDirectory(TextFormat("%s/assets",GetApplicationDirectory()));
+     floor=LoadTexture("Floor.png");
+     wall=LoadTexture("Walls.png");
+     screen=LoadRenderTexture(screen_w,screen_h);
+    SetTextureFilter(screen.texture,TEXTURE_FILTER_TRILINEAR);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    }
+
+    void draw(){
+        DrawTexture(floor,0,0,WHITE);
+        DrawTexture(wall,0,0,WHITE);
+    }
+
+    void unload(){
+    UnloadTexture(floor);
+    UnloadRenderTexture(screen);
+    UnloadTexture(wall);
+    }
+};
+
 class Enemy{
 public:
 
@@ -129,6 +157,9 @@ static Texture2D texture;
     float speed = 1.0f;
 
     float shootTimer = 0.0f;
+
+    int hp = 40;
+bool alive = true;
 
     static void LoadAssets(){
     texture = LoadTexture("zombie.png");
@@ -192,6 +223,7 @@ static void UnloadAssets(){
         pos.y += dir.y * speed;
     }
 
+    
    void draw(Vector2 playerPos){
 
     float rotation = atan2(
@@ -211,40 +243,22 @@ DrawTextureEx(
     scale,
     WHITE
 );
+DrawText(
+    TextFormat("%i", hp),
+    pos.x,
+    pos.y - 40,
+    20,
+    RED
+);
 }
 };
  Texture2D Enemy::texture;
 
-class map{
-    public:
-    Texture2D floor;
-    Texture2D wall;
-    RenderTexture2D screen;
-    void load(){
-    ChangeDirectory(TextFormat("%s/assets",GetApplicationDirectory()));
-     floor=LoadTexture("Floor.png");
-     wall=LoadTexture("Walls.png");
-     screen=LoadRenderTexture(screen_w,screen_h);
-    SetTextureFilter(screen.texture,TEXTURE_FILTER_TRILINEAR);
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    }
-
-    void draw(){
-        DrawTexture(floor,0,0,WHITE);
-        DrawTexture(wall,0,0,WHITE);
-    }
-
-    void unload(){
-    UnloadTexture(floor);
-    UnloadRenderTexture(screen);
-    UnloadTexture(wall);
-    }
-};
-
 class player{
     public:
     Vector2 pos;
-    int health;
+   int health = 200;
+bool alive = true;
 
     Texture2D player;
 
@@ -347,30 +361,125 @@ if(enemySpawnTimer >= 3.0f){
 
     enemySpawnTimer = 0;
 }
-for(auto &b : bullets){
+if(player.alive)
+{
+// Update bullets
+for(auto &b : bullets)
+{
     b.update();
 }
-for(auto &e : enemies){
 
+// Update enemies
+for(auto &e : enemies)
+{
     e.update(player.pos);
 
     e.shootTimer += GetFrameTime();
 
-    if(e.shootTimer >= 4.0f){
-
+    if(e.shootTimer >= 4.0f)
+    {
         enemyBullets.push_back(
-            EnemyBullet(
-                e.pos,
-                player.pos
-            )
+            EnemyBullet(e.pos, player.pos)
         );
 
         e.shootTimer = 0;
     }
 }
-for(auto &eb : enemyBullets){
+
+// Update enemy bullets
+for(auto &eb : enemyBullets)
+{
     eb.update();
 }
+
+// Bullet -> Enemy collision
+for(auto &b : bullets)
+{
+    if(!b.active) continue;
+
+    for(auto &e : enemies)
+    {
+        if(!e.alive) continue;
+
+        float dist = Vector2Distance(b.pos, e.pos);
+
+        if(dist < 60)   // use larger radius for testing
+        {
+            e.hp -= 10;
+
+            b.active = false;
+
+            if(e.hp <= 0)
+            {
+                e.alive = false;
+            }
+
+            break;
+        }
+    }
+}
+
+// EnemyBullet -> Player collision
+for(auto &eb : enemyBullets)
+{
+    if(!eb.active) continue;
+
+    float dist =
+        Vector2Distance(
+            eb.pos,
+            player.pos
+        );
+
+    if(dist < 40)
+    {
+        player.health -= 10;
+
+        eb.active = false;
+
+        if(player.health <= 0)
+        {
+            player.alive = false;
+        }
+    }
+}
+
+// Remove dead enemies
+enemies.erase(
+    remove_if(
+        enemies.begin(),
+        enemies.end(),
+        [](Enemy &e)
+        {
+            return !e.alive;
+        }),
+    enemies.end()
+);
+
+// Remove dead bullets
+bullets.erase(
+    remove_if(
+        bullets.begin(),
+        bullets.end(),
+        [](Bullet &b)
+        {
+            return !b.active;
+        }),
+    bullets.end()
+);
+
+// Remove dead enemy bullets
+enemyBullets.erase(
+    remove_if(
+        enemyBullets.begin(),
+        enemyBullets.end(),
+        [](EnemyBullet &b)
+        {
+            return !b.active;
+        }),
+    enemyBullets.end()
+);
+}
+
        BeginTextureMode(map.screen);
 
     ClearBackground(BLACK);
@@ -401,19 +510,53 @@ EndTextureMode();
         DrawTexturePro(map.screen.texture,source,dest,{0,0},0,WHITE);
         DrawText(TextFormat("%d",map.floor.width),0,0,20,WHITE);
         DrawText(TextFormat("%f",player.pos.x),0,30,20,WHITE);
-        EndDrawing();
-    }
-    map.unload();
-      for(auto &b : bullets){
-    b.draw();
-}
-    for(auto &e : enemies){
-    e.draw(player.pos);
+        DrawText(TextFormat("HP: %i", player.health), 20, 20, 30, GREEN);
+        if(!player.alive)
+{
+    DrawRectangle(
+        0,
+        0,
+        GetScreenWidth(),
+        GetScreenHeight(),
+        Fade(BLACK,0.7f)
+    );
 
+    DrawText(
+        "GAME OVER",
+        GetScreenWidth()/2 - 180,
+        GetScreenHeight()/2 - 50,
+        60,
+        RED
+    );
+
+    DrawText(
+        "Press R to Play Again",
+        GetScreenWidth()/2 - 170,
+        GetScreenHeight()/2 + 20,
+        30,
+        WHITE
+    );
 }
-for(auto &eb : enemyBullets){
-    eb.draw();
+                  EndDrawing();
+                  if(!player.alive &&
+   IsKeyPressed(KEY_R))
+{
+    player.health = 200;
+    player.alive = true;
+
+    player.pos = {
+        screen_w/2,
+        screen_h/2
+    };
+
+    enemies.clear();
+    bullets.clear();
+    enemyBullets.clear();
+
+    enemySpawnTimer = 0;
 }
+}
+    map.unload();
     player.unload();
     Bullet::UnloadAssets();
 EnemyBullet::UnloadAssets();
