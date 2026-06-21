@@ -11,6 +11,7 @@ int main(){
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(config::screen_w,config::screen_h,"GAME");
     SetTargetFPS(60);
+
     player player;
     camera camera;
     map map;
@@ -20,10 +21,16 @@ int main(){
     map.load();
     player.load();
 
+    InitAudioDevice();
+    Music bgm=LoadMusicStream("bgm2.wav");
+    PlayMusicStream(bgm);
+
+
     while(!WindowShouldClose()){
         player.keyboard_movement(map.map.width*config::size,map.map.height*config::size);
         camera.movement(player.pos,map.map.width*config::size,map.map.height*config::size);
 
+        UpdateMusicStream(bgm);
         BeginTextureMode(map.screen);
             ClearBackground(BLACK);
             BeginMode2D(camera.camera);
@@ -45,6 +52,8 @@ int main(){
     }
     map.unload();
     player.unload();
+    UnloadMusicStream(bgm);
+CloseAudioDevice();
 CloseWindow();  
 return 0; 
 }

@@ -2,10 +2,10 @@
 #include <cmath>
 
 void player::keyboard_movement(float screenW,float screenH){
-    if(IsKeyDown(KEY_W) && pos.y>60){pos.y-=5;}
-    if(IsKeyDown(KEY_S) && pos.y<screenH-110){pos.y+=5;}
-    if(IsKeyDown(KEY_A) && pos.x>60){pos.x-=5;}
-    if(IsKeyDown(KEY_D) && pos.x<screenW-155){pos.x+=5;}
+    if(IsKeyDown(KEY_W) && pos.y>25){pos.y-=5;}
+    if(IsKeyDown(KEY_S) && pos.y<screenH-150){pos.y+=5;}
+    if(IsKeyDown(KEY_A) && pos.x>25){pos.x-=5;}
+    if(IsKeyDown(KEY_D) && pos.x<screenW-170){pos.x+=5;}
 }
 
 void player::load(){
