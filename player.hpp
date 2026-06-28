@@ -4,7 +4,9 @@
 class player{
     public:
     Vector2 pos;
+    Vector2 dir;
     int health;
+    float speed=60*5;
 
     Texture2D player;
     Texture2D gun;

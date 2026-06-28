@@ -2,28 +2,27 @@
 #include <cmath>
 #include <raylib.h>
 
-#include "player.cpp"
-#include "map.cpp"
-#include "camera.cpp"
+#include "player.hpp"
+#include "map.hpp"
+#include "camera.hpp"
 #include "global.hpp"
 
 int main(){
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(config::screen_w,config::screen_h,"GAME");
     SetTargetFPS(60);
-
     player player;
     camera camera;
     map map;
 
     player.pos={config::screen_w/2,config::screen_h/2};
-    camera.init(player.pos);   
+    camera.init(player.pos);
     map.load();
     player.load();
 
     InitAudioDevice();
     Music bgm=LoadMusicStream("bgm2.wav");
-    PlayMusicStream(bgm);
+    //PlayMusicStream(bgm);
 
 
     while(!WindowShouldClose()){
