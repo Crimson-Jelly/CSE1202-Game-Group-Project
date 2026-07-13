@@ -26,9 +26,8 @@ void player::load(){
     gun=LoadTexture("gun.png");
     }
 
-void player::draw(Camera2D c){
-    Vector2 mouse=GetScreenToWorld2D(GetMousePosition(), c);
-    float rotation=atan2(mouse.y-(pos.y+player.height/2),mouse.x-(pos.x+player.width/2))*RAD2DEG;
+void player::draw(Vector2 mouse_pos){
+    float rotation=atan2(mouse_pos.y-(pos.y+player.height/2),mouse_pos.x-(pos.x+player.width/2))*RAD2DEG;
     Rectangle src={0,0,(float)gun.width,(float)gun.height};
     Rectangle dest={pos.x+18*scale,pos.y+18*scale,gun.width*scale,gun.height*scale};
     DrawTextureEx(player,pos,0,scale,WHITE);

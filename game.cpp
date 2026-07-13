@@ -1,11 +1,15 @@
 #include <iostream>
 #include <cmath>
 #include <raylib.h>
+#include <vector>
 
 #include "player.hpp"
 #include "map.hpp"
 #include "camera.hpp"
+#include "bullet.hpp"
 #include "global.hpp"
+
+Texture2D Bullet::bullet;
 
 int main(){
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -14,11 +18,14 @@ int main(){
     player player;
     camera camera;
     map map;
+    std::vector<Bullet> bullets;
 
     player.pos={config::screen_w/2,config::screen_h/2};
     camera.init(player.pos);
+
     map.load();
     player.load();
+    bullet.load();
 
     InitAudioDevice();
     Music bgm=LoadMusicStream("bgm2.wav");
@@ -28,13 +35,18 @@ int main(){
     while(!WindowShouldClose()){
         player.keyboard_movement(map.map.width*config::size,map.map.height*config::size);
         camera.movement(player.pos,map.map.width*config::size,map.map.height*config::size);
+        Vector2 mouse_pos=GetScreenToWorld2D(GetMousePosition(), camera.camera);
+
+        if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
+            bullets.push_back(Bullet(player.pos,mouse_pos));
+        }
 
         UpdateMusicStream(bgm);
         BeginTextureMode(map.screen);
             ClearBackground(BLACK);
             BeginMode2D(camera.camera);
             map.draw();
-            player.draw(camera.camera);
+            player.draw(mouse_pos);
             EndMode2D();
         EndTextureMode();
 
@@ -51,6 +63,7 @@ int main(){
     }
     map.unload();
     player.unload();
+    Bullet::unload();
     UnloadMusicStream(bgm);
 CloseAudioDevice();
 CloseWindow();  

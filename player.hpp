@@ -14,6 +14,6 @@ class player{
     
     void keyboard_movement(float screenW,float screenH);
     void load();
-    void draw(Camera2D c);
+    void draw(Vector2 mouse_pos);
     void unload();
 };

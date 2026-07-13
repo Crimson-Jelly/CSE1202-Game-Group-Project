@@ -1,7 +1,25 @@
 #include "bullet.hpp"
-#include "player.cpp"
+#include "player.hpp"
 
-Bullet::Bullet(){
-    pos={player.pos.x+gun.width,,player.pos.y}
+Bullet::Bullet(Vector2 intpos,Vector2 targetpos){
+    dir={targetpos.x-intpos.x, targetpos.y-intpos.y};
+    float len=sqrt(dir.x*dir.x+dir.y*dir.y);
+    dir={dir.x/len,dir.y/len};
+    velocity={dir.x*speed, dir.y*speed};
+}
+void Bullet::update(){
+    pos.x += velocity.x;
+    pos.y += velocity.y;
+}
+void Bullet::load(){
+    bullet=LoadTexture("bullet.png");
+}
+void Bullet::draw(Vector2 mouse_pos){
+    float rotation=atan2(velocity.y,velocity.x)*RAD2DEG;
+    DrawTextureEx(bullet,pos,0,1,WHITE);
+}
+void Bullet::unload(){
+    UnloadTexture(bullet);
 
 }
+
