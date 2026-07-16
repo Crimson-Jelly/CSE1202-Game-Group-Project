@@ -1,8 +1,8 @@
 #pragma once
 
 namespace config{
-    const int screen_w=1280;
-    const int screen_h=800;
-    const float  size=3.0;
-    Vector2 mouse=GetScreenToWorld2D(GetMousePosition(), c);
+    constexpr float screen_w=1280;
+    constexpr float screen_h=800;
+    constexpr float  size=3.0;
+    constexpr float scale=2;
 }

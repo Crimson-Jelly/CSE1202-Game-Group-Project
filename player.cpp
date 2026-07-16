@@ -1,6 +1,7 @@
 #include "player.hpp"
 #include <raymath.h>
 #include <cmath>
+#include "global.hpp"
 
 void player::keyboard_movement(float screenW,float screenH){  
     float dt=GetFrameTime();
@@ -29,9 +30,9 @@ void player::load(){
 void player::draw(Vector2 mouse_pos){
     float rotation=atan2(mouse_pos.y-(pos.y+player.height/2),mouse_pos.x-(pos.x+player.width/2))*RAD2DEG;
     Rectangle src={0,0,(float)gun.width,(float)gun.height};
-    Rectangle dest={pos.x+18*scale,pos.y+18*scale,gun.width*scale,gun.height*scale};
-    DrawTextureEx(player,pos,0,scale,WHITE);
-    DrawTexturePro(gun,src,dest,{0,6*scale},rotation,WHITE);
+    Rectangle dest={pos.x+18*config::scale,pos.y+18*config::scale,gun.width*config::scale,gun.height*config::scale};
+    DrawTextureEx(player,pos,0,config::scale,WHITE);
+    DrawTexturePro(gun,src,dest,{0,6*config::scale},rotation+10,WHITE);
 }
 void player::unload(){
     UnloadTexture(player);

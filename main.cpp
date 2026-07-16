@@ -9,7 +9,7 @@
 #include "bullet.hpp"
 #include "global.hpp"
 
-Texture2D Bullet::bullet;
+Texture2D Bullet::bullet_texture;
 
 int main(){
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -25,8 +25,7 @@ int main(){
 
     map.load();
     player.load();
-    bullet.load();
-
+    Bullet::load();
     InitAudioDevice();
     Music bgm=LoadMusicStream("bgm2.wav");
     //PlayMusicStream(bgm);
@@ -47,6 +46,11 @@ int main(){
             BeginMode2D(camera.camera);
             map.draw();
             player.draw(mouse_pos);
+        for(auto& bullet:bullets)
+        {
+        bullet.update();
+        bullet.draw(mouse_pos);
+        }
             EndMode2D();
         EndTextureMode();
 
