@@ -2,6 +2,8 @@
 #include <cmath>
 #include <raylib.h>
 #include <vector>
+#include <raymath.h>
+#include <algorithm>
 
 #include "player.hpp"
 #include "map.hpp"
@@ -9,10 +11,11 @@
 #include "bullet.hpp"
 #include "global.hpp"
 #include "enemy.hpp"
+#include "enemyProjectile.hpp"
 
 Texture2D Bullet::bullet_texture;
 Texture2D Enemy::enemy_texture;
-
+Texture2D EnemyProjectile::EnemyProjectile_texture;
 
 int main(){
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -23,6 +26,7 @@ int main(){
     map map;
     std::vector<Bullet> bullets;
     std::vector<Enemy> enemies;
+    std::vector<EnemyProjectile> projectiles;
 
     player.pos={config::screen_w/2,config::screen_h/2};
     camera.init(player.pos);
@@ -32,6 +36,7 @@ int main(){
     player.load();
     Bullet::load();
     Enemy::load();
+    EnemyProjectile::load();
     InitAudioDevice();
     Music bgm=LoadMusicStream("bgm2.wav");
     //PlayMusicStream(bgm);
@@ -46,25 +51,53 @@ int main(){
         }
 
         enemy_spawntimer+=GetFrameTime();
-        if(enemy_spawntimer>=3.0f){
+        if(enemy_spawntimer>=3){
         enemies.push_back(Enemy(map.map.width*config::size,map.map.height*config::size));
         enemy_spawntimer=0;
         }
+        for(auto& enemy:enemies){
+            enemy.shoot_timer+=GetFrameTime();
+            if(enemy.shoot_timer >= enemy.atk_speed){
+            projectiles.push_back(EnemyProjectile(enemy.pos, player.pos));
+            enemy.shoot_timer = 0;
+            }
+        }
+        for(auto& projectile:projectiles) projectile.update();
+        for(auto& bullet:bullets){
+            if(!bullet.active) continue;
+                for(auto& enemy:enemies){
+                    if(!enemy.alive) continue;
+                    float dist=Vector2Distance(bullet.pos,enemy.pos);
+                    if(dist<enemy.hitbox){
+                        enemy.health-=bullet.damage;
+                        bullet.active=false;
+                        if(enemy.health<=0){
+                            enemy.alive=false;
+                        }
+                    }
+            }
+        }
+
+        enemies.erase(remove_if(enemies.begin(),enemies.end(),[](Enemy &enemy){return !enemy.alive;}),enemies.end());
+
         UpdateMusicStream(bgm);
         BeginTextureMode(map.screen);
             ClearBackground(BLACK);
             BeginMode2D(camera.camera);
             map.draw();
             player.draw(mouse_pos);
-        for(auto& bullet:bullets)
-        {
-        bullet.update();
-        bullet.draw(mouse_pos);
-        }
-        for(auto& enemy:enemies){
-        enemy.movement(player.pos);
-        enemy.draw(player.pos);
-        }
+
+            if(player.alive){
+                for(auto& bullet:bullets){
+                    bullet.update();
+                    bullet.draw(mouse_pos);
+                }
+            }
+            for(auto& enemy:enemies){
+                enemy.movement(player.pos);
+                enemy.draw(player.pos);
+            }
+            for(auto& projectile:projectiles) projectile.draw();
             EndMode2D();
         EndTextureMode();
 
@@ -78,11 +111,12 @@ int main(){
         ClearBackground(BLACK);
         DrawTexturePro(map.screen.texture,source,dest,{0,0},0,WHITE);
         EndDrawing();
-    }
+}
     map.unload();
     player.unload();
     Bullet::unload();
     Enemy::unload();
+    EnemyProjectile::unload();
     UnloadMusicStream(bgm);
 CloseAudioDevice();
 CloseWindow();  

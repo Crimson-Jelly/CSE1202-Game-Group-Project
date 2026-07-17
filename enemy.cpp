@@ -20,7 +20,7 @@ Enemy::Enemy(float mapWidth,float mapHeight){
 }
 
 void Enemy::load(){
-    enemy_texture=LoadTexture("enemy.png");
+    enemy_texture=LoadTexture("enemy1.png");
 }
 
 void Enemy::unload(){
@@ -29,19 +29,12 @@ void Enemy::unload(){
 void Enemy::movement(Vector2 playerPos){
     Vector2 dir={playerPos.x-pos.x,playerPos.y-pos.y};
     float len=sqrt(dir.x*dir.x + dir.y*dir.y);
-    if(len>0){
-    dir.x /= len;
-    dir.y /= len;
-    }
-
-    pos.x+= dir.x*speed;
-    pos.y+= dir.y*speed;
+    if(len>0) dir={dir.x/len,dir.y/len};
+    pos={pos.x+=dir.x*speed,pos.y+=dir.y*speed};
 }
 
 void Enemy::draw(Vector2 playerPos){
-    float rotation=atan2(playerPos.y-pos.y,playerPos.x-pos.x)*RAD2DEG*0;
     float scale=5;
-
-DrawTextureEx(enemy_texture,{pos.x-enemy_texture.width*scale/2,pos.y-enemy_texture.height*scale/2},rotation,scale,WHITE);
-DrawText(TextFormat("%i",health),pos.x,pos.y-30,20,RED);
+    DrawTextureEx(enemy_texture,{pos.x-enemy_texture.width*scale/2,pos.y-enemy_texture.height*scale/2},0,scale,WHITE);
+    DrawText(TextFormat("%i",health),pos.x,pos.y-30,20,RED);
 }

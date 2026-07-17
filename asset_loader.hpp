@@ -9,9 +9,9 @@ namespace asset{
 class asset_manager{
 public:
 Texture2D player;
-Texture2D player;
+Texture2D gun;
 Texture2D map;
-
+Texture2D bullet;
 void load();
 void unload();
 };

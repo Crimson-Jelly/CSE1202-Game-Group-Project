@@ -5,7 +5,7 @@ class player{
     public:
     Vector2 pos;
     Vector2 dir;
-    int health;
+    int health=100;
     float speed=60*5;
     bool alive=true;
 
