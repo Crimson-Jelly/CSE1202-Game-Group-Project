@@ -1,7 +1,6 @@
 #pragma once
 #include <raylib.h>
 #include <math.h>
-
 class Bullet{
 public:
     Vector2 pos;
@@ -14,8 +13,6 @@ public:
     int Magazine=10;
     int Temp_magazine=Magazine;
     float damage;
-
-
 
     Bullet(Vector2 intpos,Vector2 targetpos);
     void update();
