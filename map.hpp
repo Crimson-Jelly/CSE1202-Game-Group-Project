@@ -3,9 +3,10 @@
 
 class map{
     public:
-    Texture2D map;
+    
     RenderTexture2D screen;
-    void load();
+    void init();
     void draw();
-    void unload();
+    void destroy();
+
 };

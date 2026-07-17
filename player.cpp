@@ -1,8 +1,7 @@
 #include "player.hpp"
 #include <raymath.h>
 #include <cmath>
-#include "global.hpp"
-
+#include "asset_loader.hpp"
 void player::keyboard_movement(float screenW,float screenH){  
     float dt=GetFrameTime();
     dir={0,0};
@@ -22,21 +21,10 @@ void player::keyboard_movement(float screenW,float screenH){
     }
 }
 
-void player::load(){
-    player=LoadTexture("player.png");
-    gun=LoadTexture("gun.png");
-    gun_2=LoadTexture("gun.png");
-    }
-
 void player::draw(Vector2 mouse_pos){
-    float rotation=atan2(mouse_pos.y-(pos.y+player.height/2),mouse_pos.x-(pos.x+player.width/2))*RAD2DEG;
-    Rectangle src={0,0,(float)gun.width,(float)gun.height};
-    Rectangle dest={pos.x+18*config::scale,pos.y+18*config::scale,gun.width*config::scale,gun.height*config::scale};
-    DrawTextureEx(player,pos,0,config::scale,WHITE);
-    DrawTexturePro(gun,src,dest,{0,6*config::scale},rotation+5,WHITE);
-}
-void player::unload(){
-    UnloadTexture(player);
-    UnloadTexture(gun);
-    UnloadTexture(gun_2);
+    float rotation=atan2(mouse_pos.y-(pos.y+assets.player.height/2),mouse_pos.x-(pos.x+assets.player.width/2))*RAD2DEG;
+    Rectangle src={0,0,(float)assets.gun.width,(float)assets.gun.height};
+    Rectangle dest={pos.x+18*scale,pos.y+18*scale,assets.gun.width*scale,assets.gun.height*scale};
+    DrawTextureEx(assets.player,pos,0,scale,WHITE);
+    DrawTexturePro(assets.gun,src,dest,{0,6*scale},rotation,WHITE);
 }
