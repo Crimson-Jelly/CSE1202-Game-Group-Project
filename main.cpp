@@ -9,13 +9,29 @@
 #include "map.hpp"
 #include "camera.hpp"
 #include "bullet.hpp"
+#include "asset_loader.hpp"
 #include "global.hpp"
 #include "enemy.hpp"
 #include "enemyProjectile.hpp"
-
-Texture2D Bullet::bullet_texture;
+#include "med.hpp"
+enum GameState{
+    MENU,
+    DIFFICULTY,
+    GAME,
+    HIGHSCORE,
+    EXITGAME
+};
+enum Difficulty{
+    EASY,
+    MEDIUM,
+    HARD
+};
 Texture2D Enemy::enemy_texture;
 Texture2D EnemyProjectile::EnemyProjectile_texture;
+
+Difficulty gameDifficulty = EASY;
+
+GameState currentState = MENU;
 
 int main(){
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -25,32 +41,105 @@ int main(){
     camera camera;
     map map;
     std::vector<Bullet> bullets;
-    std::vector<Enemy> enemies;
+      std::vector<Enemy> enemies;
     std::vector<EnemyProjectile> projectiles;
+    Medikit med;
 
     player.pos={config::screen_w/2,config::screen_h/2};
     camera.init(player.pos);
-    float enemy_spawntimer=0.0f;
+     float enemy_spawntimer=0.0f;
+     map.load();
+assets.load();
+med.load();
+Enemy::load();
+EnemyProjectile::load();
 
-    map.load();
-    player.load();
-    Bullet::load();
-    Enemy::load();
-    EnemyProjectile::load();
     InitAudioDevice();
     Music bgm=LoadMusicStream("bgm2.wav");
     //PlayMusicStream(bgm);
 
     while(!WindowShouldClose()){
+        if(currentState == MENU){
+Rectangle playButton = {490, 250, 300, 60};
+Rectangle scoreButton = {490, 340, 300, 60};
+Rectangle exitButton = {490, 430, 300, 60};
+BeginDrawing();
+ClearBackground(BLACK);
+DrawRectangleRec(playButton, DARKGRAY);
+DrawRectangleRec(scoreButton, DARKGRAY);
+DrawRectangleRec(exitButton, DARKGRAY);
+DrawText("PLAY", 590, 270, 30, WHITE);
+DrawText("HIGH SCORES", 525, 360, 30, WHITE);
+DrawText("EXIT", 595, 450, 30, WHITE);
+            Vector2 mouse = GetMousePosition();
+Color playColor = DARKGRAY;
+if(CheckCollisionPointRec(mouse, playButton)){
+    playColor = GRAY;
+DrawRectangleRec(playButton, playColor);
+}
+if(CheckCollisionPointRec(mouse, scoreButton)){
+    playColor = GRAY;
+DrawRectangleRec(scoreButton, playColor);
+}
+if(CheckCollisionPointRec(mouse, exitButton)){
+    playColor = GRAY;
+DrawRectangleRec(exitButton, playColor);
+}
+    EndDrawing();
+
+    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
+    Vector2 mouse = GetMousePosition();
+    if(CheckCollisionPointRec(mouse, playButton)){
+        currentState = DIFFICULTY;
+    }
+    if(CheckCollisionPointRec(mouse, scoreButton)){
+        currentState = HIGHSCORE;
+    }
+    if(CheckCollisionPointRec(mouse, exitButton)){
+        CloseWindow();
+    }
+}
+    continue;
+}
+        if(currentState == DIFFICULTY){
+    BeginDrawing();
+    ClearBackground(BLACK);
+   Rectangle easyButton   = {490,250,300,60};
+Rectangle mediumButton = {490,340,300,60};
+Rectangle hardButton   = {490,430,300,60};
+DrawRectangleRec(easyButton, GREEN);
+DrawRectangleRec(mediumButton, ORANGE);
+DrawRectangleRec(hardButton, RED);
+DrawText("EASY",560,270,30,BLACK);
+DrawText("MEDIUM",540,360,30,BLACK);
+DrawText("HARD",560,450,30,BLACK);
+    EndDrawing();
+            if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
+    Vector2 mouse = GetMousePosition();
+    if(CheckCollisionPointRec(mouse, easyButton)){
+        gameDifficulty = EASY;
+        currentState = GAME;
+    }
+    if(CheckCollisionPointRec(mouse, mediumButton)){
+        gameDifficulty= MEDIUM;
+        currentState = GAME;
+    }
+    if(CheckCollisionPointRec(mouse, hardButton)){
+        gameDifficulty = HARD;
+        currentState = GAME;
+    }
+}
+}
+            if(currentState == GAME){
         player.keyboard_movement(map.map.width*config::size,map.map.height*config::size);
         camera.movement(player.pos,map.map.width*config::size,map.map.height*config::size);
         Vector2 mouse_pos=GetScreenToWorld2D(GetMousePosition(), camera.camera);
+        med.update(map.map.width*config::size, map.map.height*config::size);
 
         if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
             bullets.push_back(Bullet(player.pos,mouse_pos));
         }
-
-        enemy_spawntimer+=GetFrameTime();
+          enemy_spawntimer+=GetFrameTime();
         if(enemy_spawntimer>=3){
         enemies.push_back(Enemy(map.map.width*config::size,map.map.height*config::size));
         enemy_spawntimer=0;
@@ -79,15 +168,34 @@ int main(){
         }
 
         enemies.erase(remove_if(enemies.begin(),enemies.end(),[](Enemy &enemy){return !enemy.alive;}),enemies.end());
+        bullets.erase(
+    remove_if(bullets.begin(), bullets.end(), [](Bullet &b){
+        return !b.active;
+    }),
+    bullets.end()
+);
+projectiles.erase(
+    remove_if(
+        projectiles.begin(),
+        projectiles.end(),
+        [](EnemyProjectile &b)
+        {
+            return !b.active;
+        }),
+    projectiles.end()
+);
 
         UpdateMusicStream(bgm);
         BeginTextureMode(map.screen);
+        BeginDrawing();
             ClearBackground(BLACK);
+            DrawText(
+    TextFormat("HP: %i", player.health), 20, 20, 30, GREEN);
             BeginMode2D(camera.camera);
             map.draw();
+            med.draw();
             player.draw(mouse_pos);
-
-            if(player.alive){
+             if(player.alive){
                 for(auto& bullet:bullets){
                     bullet.update();
                     bullet.draw(mouse_pos);
@@ -111,11 +219,12 @@ int main(){
         ClearBackground(BLACK);
         DrawTexturePro(map.screen.texture,source,dest,{0,0},0,WHITE);
         EndDrawing();
+    }
 }
-    map.unload();
-    player.unload();
-    Bullet::unload();
-    Enemy::unload();
+map.unload();
+med.unload();
+assets.unload();
+Enemy::unload();
     EnemyProjectile::unload();
     UnloadMusicStream(bgm);
 CloseAudioDevice();
