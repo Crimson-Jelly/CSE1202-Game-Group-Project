@@ -25,6 +25,7 @@ void player::keyboard_movement(float screenW,float screenH){
 void player::load(){
     player=LoadTexture("player.png");
     gun=LoadTexture("gun.png");
+    gun_2=LoadTexture("gun.png");
     }
 
 void player::draw(Vector2 mouse_pos){
@@ -32,9 +33,10 @@ void player::draw(Vector2 mouse_pos){
     Rectangle src={0,0,(float)gun.width,(float)gun.height};
     Rectangle dest={pos.x+18*config::scale,pos.y+18*config::scale,gun.width*config::scale,gun.height*config::scale};
     DrawTextureEx(player,pos,0,config::scale,WHITE);
-    DrawTexturePro(gun,src,dest,{0,6*config::scale},rotation+10,WHITE);
+    DrawTexturePro(gun,src,dest,{0,6*config::scale},rotation+5,WHITE);
 }
 void player::unload(){
     UnloadTexture(player);
     UnloadTexture(gun);
+    UnloadTexture(gun_2);
 }

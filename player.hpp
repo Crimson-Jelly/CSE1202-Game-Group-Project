@@ -10,6 +10,7 @@ class player{
 
     Texture2D player;
     Texture2D gun;
+    Texture2D gun_2;
     
     void keyboard_movement(float screenW,float screenH);
     void load();
