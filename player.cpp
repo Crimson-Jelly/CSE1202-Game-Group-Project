@@ -1,17 +1,18 @@
 #include "player.hpp"
-#include <raymath.h>
+#include "raylib.h"
+#include "raymath.h"
 #include <cmath>
 #include "global.hpp"
 
 void player::keyboard_movement(float screenW,float screenH){  
     float dt=GetFrameTime();
     dir={0,0};
-    if(IsKeyDown(KEY_W) && pos.y>25){dir.y=-1.0f;}
-    if(IsKeyDown(KEY_S) && pos.y<screenH-150){dir.y=1.0f;}
-    if(IsKeyDown(KEY_A) && pos.x>25){dir.x=-1.0f;}
-    if(IsKeyDown(KEY_D) && pos.x<screenW-170){dir.x=1.0f;}
+    if((IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) && pos.y>25){pos.y-=5;}
+    if((IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) && pos.y<screenH-150){pos.y+=5;}
+    if((IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) && pos.x>25){pos.x-=5;}
+    if((IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) && pos.x<screenW-170){pos.x+=5;}
 
-    if(dir.x!=0 || dir.y!=0){
+  if(dir.x!=0 || dir.y!=0){
         dir=Vector2Normalize(dir);
         pos.x+=dir.x*speed*dt;
         pos.y+=dir.y*speed*dt;
