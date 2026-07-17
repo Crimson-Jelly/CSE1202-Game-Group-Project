@@ -7,6 +7,7 @@ class player{
     Vector2 dir;
     int health;
     float speed=60*5;
+    bool alive=true;
 
     Texture2D player;
     Texture2D gun;

@@ -2,7 +2,7 @@
 #include "global.hpp"
 
 Bullet::Bullet(Vector2 intpos,Vector2 targetpos){
-    pos={intpos.x+18*config::scale,intpos.y+16*config::scale};
+    pos={intpos.x+20*config::scale,intpos.y+16*config::scale};
     dir={targetpos.x-intpos.x, targetpos.y-intpos.y};
     float len=sqrt(dir.x*dir.x+dir.y*dir.y);
     dir={dir.x/len,dir.y/len};
