@@ -36,7 +36,6 @@ int main(){
     Music bgm=LoadMusicStream("bgm2.wav");
     //PlayMusicStream(bgm);
 
-
     while(!WindowShouldClose()){
         player.keyboard_movement(map.map.width*config::size,map.map.height*config::size);
         camera.movement(player.pos,map.map.width*config::size,map.map.height*config::size);
@@ -63,6 +62,7 @@ int main(){
         bullet.draw(mouse_pos);
         }
         for(auto& enemy:enemies){
+        enemy.movement(player.pos);
         enemy.draw(player.pos);
         }
             EndMode2D();

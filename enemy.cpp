@@ -5,16 +5,16 @@ Enemy::Enemy(float mapWidth,float mapHeight){
     int side=GetRandomValue(0,3);
     switch(side){
         case 0:
-            pos={(float)GetRandomValue(0,mapWidth),0};
+            pos={(float)GetRandomValue(10,mapWidth),10};
             break;
         case 1:
-            pos={(float)GetRandomValue(0,mapWidth),mapHeight};
+            pos={(float)GetRandomValue(10,mapWidth),mapHeight};
             break;
         case 2:
-            pos={0,(float)GetRandomValue(0,mapHeight)};
+            pos={0,(float)GetRandomValue(10,mapHeight)};
             break;
         case 3:
-            pos={mapWidth,(float)GetRandomValue(0,mapHeight)};
+            pos={mapWidth,(float)GetRandomValue(10,mapHeight)};
             break;
         }
 }
@@ -26,7 +26,7 @@ void Enemy::load(){
 void Enemy::unload(){
     UnloadTexture(enemy_texture);
 }
-void Enemy::update(Vector2 playerPos){
+void Enemy::movement(Vector2 playerPos){
     Vector2 dir={playerPos.x-pos.x,playerPos.y-pos.y};
     float len=sqrt(dir.x*dir.x + dir.y*dir.y);
     if(len>0){
@@ -39,7 +39,7 @@ void Enemy::update(Vector2 playerPos){
 }
 
 void Enemy::draw(Vector2 playerPos){
-    float rotation=atan2(playerPos.y-pos.y,playerPos.x-pos.x)*RAD2DEG;
+    float rotation=atan2(playerPos.y-pos.y,playerPos.x-pos.x)*RAD2DEG*0;
     float scale=5;
 
 DrawTextureEx(enemy_texture,{pos.x-enemy_texture.width*scale/2,pos.y-enemy_texture.height*scale/2},rotation,scale,WHITE);

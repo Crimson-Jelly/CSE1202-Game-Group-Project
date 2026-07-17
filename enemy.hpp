@@ -14,6 +14,6 @@ class Enemy{
     Enemy(float mapWidth,float mapHeight);
     static void load();
     static void unload();
-    void update(Vector2 playerPos);
+    void movement(Vector2 playerPos);
     void draw(Vector2 playerPos);
 };
