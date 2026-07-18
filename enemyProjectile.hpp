@@ -7,7 +7,7 @@ bool active=true;
 Vector2 pos;
 Vector2 dir;
 Vector2 velocity;
-float speed=6.0f;
+float speed=8.0f;
 static Texture2D EnemyProjectile_texture;
 
 EnemyProjectile(Vector2 startpos, Vector2 finalpos);
