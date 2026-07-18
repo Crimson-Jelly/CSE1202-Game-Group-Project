@@ -6,12 +6,10 @@ void asset_manager::load(){
     map=LoadTexture(asset::map);
     bullet = LoadTexture(asset::bullet);
 }
-
 void asset_manager::unload(){
     UnloadTexture(player);
     UnloadTexture(gun);
     UnloadTexture(map);
     UnloadTexture(bullet);
 }
-
 asset_manager assets;
