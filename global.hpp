@@ -5,4 +5,5 @@ namespace config{
     constexpr float screen_h=800;
     constexpr float  size=3.0;
     constexpr float scale=2;
+    inline float enemy_damage=30.0f;
 }
