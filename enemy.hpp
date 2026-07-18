@@ -5,8 +5,7 @@ class Enemy{
     public:
     Vector2 pos;
     float speed=2;
-    float damage=20;
-    int health=100;
+    int health = 100;
     float atk_speed=6;
     float shoot_timer=0;
     float spawntime=3;
