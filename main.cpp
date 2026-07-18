@@ -18,6 +18,7 @@ enum GameState{
     MENU,
     DIFFICULTY,
     GAME,
+    GAMEOVER,
     HIGHSCORE,
     EXITGAME
 };
@@ -28,10 +29,22 @@ enum Difficulty{
 };
 Texture2D Enemy::enemy_texture;
 Texture2D EnemyProjectile::EnemyProjectile_texture;
+Texture2D Bullet::bullet_texture;
 
 Difficulty gameDifficulty = EASY;
 
 GameState currentState = MENU;
+
+void ResetGame(player& player,std::vector<Bullet>& bullets,std::vector<Enemy>& enemies,
+    std::vector<EnemyProjectile>& projectiles, Medikit& med, float& enemy_spawntimer){
+    player.reset();
+    bullets.clear();
+    enemies.clear();
+    projectiles.clear();
+    med.active = false;
+    med.timer = 0.0f;
+    enemy_spawntimer = 0.0f;
+}
 
 int main(){
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -44,6 +57,10 @@ int main(){
       std::vector<Enemy> enemies;
     std::vector<EnemyProjectile> projectiles;
     Medikit med;
+    int score = 0;
+    int highScoreEasy = 0;
+    int highScoreMedium = 0;
+    int highScoreHard = 0;
 
     player.pos={config::screen_w/2,config::screen_h/2};
     camera.init(player.pos);
@@ -51,6 +68,7 @@ int main(){
      map.load();
 assets.load();
 med.load();
+Bullet::load();
 Enemy::load();
 EnemyProjectile::load();
 
@@ -101,6 +119,20 @@ DrawRectangleRec(exitButton, playColor);
 }
     continue;
 }
+if(currentState == HIGHSCORE){
+    BeginDrawing();
+    ClearBackground(BLACK);
+    DrawText("HIGH SCORES", 450, 120, 50, GOLD);
+    DrawText(TextFormat("EASY   : %d", highScoreEasy), 500, 240, 35, GREEN);
+    DrawText(TextFormat("MEDIUM : %d", highScoreMedium), 500, 320, 35, ORANGE);
+    DrawText(TextFormat("HARD   : %d", highScoreHard), 500, 400, 35, RED);
+    DrawText("Press M For Menu", 450, 520, 30, WHITE);
+    EndDrawing();
+    if(IsKeyPressed(KEY_M)){
+        currentState = MENU;
+    }
+    continue;
+}
         if(currentState == DIFFICULTY){
     BeginDrawing();
     ClearBackground(BLACK);
@@ -122,10 +154,12 @@ DrawText("HARD",560,450,30,BLACK);
     }
     if(CheckCollisionPointRec(mouse, mediumButton)){
         gameDifficulty= MEDIUM;
+        config::enemy_damage = 40;
         currentState = GAME;
     }
     if(CheckCollisionPointRec(mouse, hardButton)){
         gameDifficulty = HARD;
+        config::enemy_damage = 60;
         currentState = GAME;
     }
 }
@@ -151,8 +185,20 @@ DrawText("HARD",560,450,30,BLACK);
             enemy.shoot_timer = 0;
             }
         }
-        for(auto& projectile:projectiles) projectile.update();
-        for(auto& bullet:bullets){
+        for(auto& projectile:projectiles){
+            projectile.update();
+            if(!projectile.active) continue;
+            if(!player.alive) continue;
+                float dist=Vector2Distance(projectile.pos,player.pos);
+                if(dist<player.hitbox){
+                    player.health-=config::enemy_damage;
+                    projectile.active=false;
+                    if(player.health<=0){
+                        player.alive=false;
+                    }
+                }
+        }
+         for(auto& bullet:bullets){
             if(!bullet.active) continue;
                 for(auto& enemy:enemies){
                     if(!enemy.alive) continue;
@@ -162,11 +208,29 @@ DrawText("HARD",560,450,30,BLACK);
                         bullet.active=false;
                         if(enemy.health<=0){
                             enemy.alive=false;
+                            score+=10;
                         }
                     }
             }
         }
-
+if(!player.alive){
+    if(gameDifficulty == EASY){
+        if(score > highScoreEasy){
+        highScoreEasy = score;
+        }
+}
+    if(gameDifficulty == MEDIUM){
+        if(score > highScoreMedium){
+        highScoreMedium = score;
+        }
+}
+    if(gameDifficulty == HARD){
+        if(score > highScoreHard){
+        highScoreHard = score;
+        }
+}
+    currentState = GAMEOVER;
+}
         enemies.erase(remove_if(enemies.begin(),enemies.end(),[](Enemy &enemy){return !enemy.alive;}),enemies.end());
         bullets.erase(
     remove_if(bullets.begin(), bullets.end(), [](Bullet &b){
@@ -187,10 +251,7 @@ projectiles.erase(
 
         UpdateMusicStream(bgm);
         BeginTextureMode(map.screen);
-        BeginDrawing();
             ClearBackground(BLACK);
-            DrawText(
-    TextFormat("HP: %i", player.health), 20, 20, 30, GREEN);
             BeginMode2D(camera.camera);
             map.draw();
             med.draw();
@@ -218,13 +279,40 @@ projectiles.erase(
         BeginDrawing();
         ClearBackground(BLACK);
         DrawTexturePro(map.screen.texture,source,dest,{0,0},0,WHITE);
+         DrawText(TextFormat("HP: %i", player.health), 20, 20, 30, GREEN);
+    DrawText(TextFormat("Score: %i", score), 20, 60, 30, YELLOW);
         EndDrawing();
     }
+    if(currentState == GAMEOVER){
+    BeginDrawing();
+    ClearBackground(BLACK);
+    DrawText("GAME OVER", config::screen_w/2 - 140, 180, 60, RED);
+    DrawText(TextFormat("Final Score: %i", score), config::screen_w/2 - 140, 280, 30, WHITE);
+    DrawText("P - PLAY AGAIN", config::screen_w/2 - 140, 380, 30, GREEN);
+    DrawText("M - MAIN MENU", config::screen_w/2 - 140, 430, 30, YELLOW);
+    DrawText( "Q - EXIT", config::screen_w/2 - 140, 480, 30, RED);
+    EndDrawing();
+    if(IsKeyPressed(KEY_P)){
+        ResetGame(player, bullets, enemies, projectiles, med, enemy_spawntimer);
+        score = 0;
+        currentState = DIFFICULTY;
+    }
+    if(IsKeyPressed(KEY_M)){
+        ResetGame( player, bullets, enemies, projectiles, med, enemy_spawntimer);
+        score = 0;
+        currentState = MENU;
+    }
+    if(IsKeyPressed(KEY_Q)){
+        CloseWindow();
+    }
+    continue;
+}
 }
 map.unload();
 med.unload();
 assets.unload();
 Enemy::unload();
+Bullet::unload();
     EnemyProjectile::unload();
     UnloadMusicStream(bgm);
 CloseAudioDevice();
