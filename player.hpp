@@ -5,7 +5,7 @@ class player{
     public:
     Vector2 pos;
     Vector2 dir;
-    int health=100;
+    int health=200;
     float speed=60*5;
     bool alive=true;
     int hitbox=60;
@@ -16,6 +16,7 @@ class player{
     
     void keyboard_movement(float screenW,float screenH);
     void draw(Vector2 mouse_pos);
+    void reset();
     void load();
     void unload();
 };

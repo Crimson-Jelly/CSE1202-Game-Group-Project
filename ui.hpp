@@ -1,6 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include "global.hpp"
+#include <vector>
 
 enum GameState{
     MENU,
@@ -34,6 +35,10 @@ public:
     int highScoreMedium=0;
     int highScoreHard=0;
 
+    bool reset=false;
+    Sound click;
+    Sound death;
+
     void menu_draw(Vector2 mouse,RenderTexture2D screen,Rectangle source,Rectangle dest);
     void menu_update(Vector2 mouse);
     void difficulty_draw(RenderTexture2D screen,Rectangle source,Rectangle dest);
@@ -42,4 +47,6 @@ public:
     void highscore_draw(RenderTexture2D screen,Rectangle source,Rectangle dest);
     void gameover_draw(int score,RenderTexture2D screen,Rectangle source,Rectangle dest);
     void gameover_update(int score);
+    void load();
+    void unload();
 };

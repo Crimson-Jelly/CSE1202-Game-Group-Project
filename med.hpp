@@ -1,17 +1,20 @@
 #pragma once
 #include <raylib.h>
+#include <raymath.h>
+
 class Medkit{
 public:
     Vector2 pos;
-    bool active;
-    float timer;
-    float spawnTime;
+    bool active=false;
+    float timer=0;
+    float spawnTime=10;
     Texture2D texture;
-    Medkit();
+    float scale=2.5;
+    int heal=15;
+
     void load();
     void unload();
-    void update(float mapWidth, float mapHeight);
+    void init(float mapWidth, float mapHeight);
     void draw();
-    Rectangle getRect();
-    void despawn();
+    void despawn(Vector2 player_pos,int &player_health);
 };

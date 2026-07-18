@@ -4,6 +4,7 @@
 void UI::menu_draw(Vector2 mouse,RenderTexture2D screen,Rectangle source,Rectangle dest){
     BeginTextureMode(screen);
     ClearBackground(BLACK);
+    DrawText("Shadow Dungeon",400,150,60,RED);
     DrawRectangleRec(playButton,DARKGRAY);
     DrawRectangleRec(scoreButton,DARKGRAY);
     DrawRectangleRec(exitButton,DARKGRAY);
@@ -35,6 +36,7 @@ void UI::menu_draw(Vector2 mouse,RenderTexture2D screen,Rectangle source,Rectang
 }
 void UI::menu_update(Vector2 mouse){
     if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
+        PlaySound(click);
         if(CheckCollisionPointRec(mouse,playButton)){
             currentState=DIFFICULTY;
         }
@@ -67,17 +69,21 @@ void UI::difficulty_draw(RenderTexture2D screen,Rectangle source,Rectangle dest)
 
 void UI::difficulty_update(Vector2 mouse){
     if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
+        PlaySound(click);
         if(CheckCollisionPointRec(mouse,easyButton)){
             gameDifficulty=EASY;
             currentState=GAME;
+            config::enemy_damage = 30;
         }
         if(CheckCollisionPointRec(mouse,mediumButton)){
             gameDifficulty=MEDIUM;
             currentState=GAME;
+            config::enemy_damage = 40;
         }
         if(CheckCollisionPointRec(mouse,hardButton)){
             gameDifficulty=HARD;
             currentState=GAME;
+            config::enemy_damage = 60;
         }
     }
 }
@@ -102,6 +108,7 @@ void UI::highscore_draw(RenderTexture2D screen,Rectangle source,Rectangle dest){
 }
 void UI::highscore_update(bool player_status){
     if(!player_status){
+        PlaySound(death);
         if(gameDifficulty==EASY){
             if(score>highScoreEasy){
                 highScoreEasy=score;
@@ -138,16 +145,24 @@ void UI::gameover_draw(int score,RenderTexture2D screen,Rectangle source,Rectang
 }
 void UI::gameover_update(int score){
     if(IsKeyPressed(KEY_P)){
-        score=0;
+        reset=true;
         currentState=GAME;
     }
     if(IsKeyPressed(KEY_M)){
-        score=0;
+        reset=true;
         currentState=MENU;
     }
     if(IsKeyPressed(KEY_Q)){
         CloseWindow();
     }
+}
+void UI::load(){
+    click=LoadSound("click.mp3");
+    death=LoadSound("death.mp3");
+}
+void UI::unload(){
+    UnloadSound(click);
+    UnloadSound(death);
 }
 
 

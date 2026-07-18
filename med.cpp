@@ -1,38 +1,40 @@
 #include "med.hpp"
 #include <cstdlib>
 
-Medkit::Medkit(){
-    active=false;
-    timer=0.0f;
-    spawnTime=20.0f;
-    pos={0,0};
-}
 void Medkit::load(){
     texture=LoadTexture("med.png");
 }
+
 void Medkit::unload(){
     UnloadTexture(texture);
 }
-void Medkit::update(float mapWidth,float mapHeight){
+
+void Medkit::init(float mapWidth,float mapHeight){
     if(active){
         return;
     }
+
     timer+=GetFrameTime();
     if(timer>=spawnTime){
         timer=0;
-        pos.x=50+rand()%((int)mapWidth-100);
-        pos.y=50+rand()%((int)mapHeight-100);
+        pos.x=(float)GetRandomValue(50,mapWidth);
+        pos.y=(float)GetRandomValue(50,mapHeight);
         active=true;
     }
-}
+ }
+
 void Medkit::draw(){
     if(active){
-        DrawTexture(texture,pos.x,pos.y,WHITE);
+        DrawTextureEx(texture,{pos.x,pos.y},0,scale,WHITE);
     }
 }
-Rectangle Medkit::getRect(){
-    return Rectangle{pos.x,pos.y,(float)texture.width,(float)texture.height};
-}
-void Medkit::despawn(){
-    active = false;
+
+void Medkit::despawn(Vector2 player_pos,int &player_health){
+    if(!active) return;
+    float dist=Vector2Distance(player_pos,pos);
+    if(dist<texture.width*scale){
+        active = false;
+        player_health+=heal;
+    }
+    if(player_health>200) player_health=200;
 }

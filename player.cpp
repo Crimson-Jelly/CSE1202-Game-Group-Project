@@ -30,6 +30,12 @@ void player::draw(Vector2 mouse_pos){
     DrawTexturePro(gun,src,dest,{0,6*config::scale},rotation+5,WHITE);
 }
 
+void player::reset(){
+    health=200;
+    alive=true;
+    pos={config::screen_w/2,config::screen_h/2};
+}
+
 void player::load(){
     player=LoadTexture("player.png");
     gun=LoadTexture("gun.png");

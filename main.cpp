@@ -45,8 +45,11 @@ int main(){
     Enemy::load();
     EnemyProjectile::load();
     InitAudioDevice();
-    Music bgm=LoadMusicStream("bgm2.wav");
+    ui.load();
+    Music bgm=LoadMusicStream("mars.wav");
+    Music menu=LoadMusicStream("menu.mp3");
     PlayMusicStream(bgm);
+    PlayMusicStream(menu);
 
     while(!WindowShouldClose()){
         //setting up resizable window
@@ -72,10 +75,14 @@ int main(){
         if(ui.currentState==HIGHSCORE){
             ui.highscore_draw(map.screen,source,dest);
         }
+        if(ui.currentState==HIGHSCORE || ui.currentState==DIFFICULTY || ui.currentState==MENU){
+            UpdateMusicStream(menu);
+        }
         if(ui.currentState==GAME){
         player.keyboard_movement(map.map.width*config::size,map.map.height*config::size);
         camera.movement(player.pos,map.map.width*config::size,map.map.height*config::size);
-        med.update(map.map.width*config::size, map.map.height*config::size);
+        med.init(map.map.width*config::size, map.map.height*config::size);
+        med.despawn(player.pos,player.health);
 
         if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
             bullets.push_back(Bullet(player.pos,mouse_pos));
@@ -164,14 +171,28 @@ int main(){
         ui.gameover_draw(ui.score,map.screen,source,dest);
         ui.gameover_update(ui.score);
     }
+    if(ui.reset){
+        player.reset();
+        bullets.clear();
+        enemies.clear();
+        projectiles.clear();
+        med.active=false;
+        med.timer=0;
+        enemy_spawntimer=0;
+        ui.score=0;
+        ui.reset=false;
+    }
 }
     map.unload();
     player.unload();
     med.unload();
+    ui.unload();
     Bullet::unload();
     Enemy::unload();
     EnemyProjectile::unload();
     UnloadMusicStream(bgm);
+    UnloadMusicStream(menu);
+    
 CloseAudioDevice();
 CloseWindow();
   
